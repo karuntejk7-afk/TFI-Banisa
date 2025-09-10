@@ -1,1 +1,437 @@
+<!-- Save this file as index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Telugu 2024 — Box Office Dashboard</title>
+
+  <style>
+    /* ====== Base / Theme ====== */
+    :root{
+      --bg:#070708;
+      --panel:#0f1112;
+      --muted:#9aa0a6;
+      --accent:#8b0000; /* deep red */
+      --accent-2:#b85a3f; /* metallic rust */
+      --glass: rgba(255,255,255,0.03);
+      --card-shadow: 0 8px 22px rgba(0,0,0,0.6);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,var(--bg),#0a0b0c 60%);
+      color:#f5f6f7;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:24px;
+    }
+
+    /* ====== Navbar ====== */
+    .nav{
+      display:flex;
+      gap:20px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:22px;
+    }
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo {
+      width:46px;height:46px;border-radius:8px;
+      background:linear-gradient(135deg,#111315,#2b2b2b);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:var(--card-shadow);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .logo svg{width:26px;height:26px;opacity:0.95}
+    .brand h1{font-size:18px;margin:0;font-weight:700;letter-spacing:0.6px}
+    .brand p{margin:0;font-size:12px;color:var(--muted)}
+
+    .nav-actions{display:flex;gap:12px;align-items:center}
+    .btn{
+      padding:10px 14px;border-radius:10px;border:0;cursor:pointer;
+      font-weight:600;background:var(--glass);color:var(--muted);
+      border:1px solid rgba(255,255,255,0.03);
+      transition:all .22s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+    }
+    .btn.primary{
+      background:linear-gradient(90deg, #8b0000, #b85a3f);
+      color:white;
+      letter-spacing:0.6px;
+    }
+    .btn:hover{transform:translateY(-3px);filter:brightness(1.05)}
+
+    /* ====== Hero ====== */
+    .hero{
+      position:relative;
+      border-radius:14px;
+      overflow:hidden;
+      min-height:320px;
+      background-image: url('https://images.unsplash.com/photo-1517604931442-5d0f8f6d4b14?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.0.3&s='); /* cinematic placeholder */
+      background-size:cover;
+      background-position:center center;
+      box-shadow:var(--card-shadow);
+      border:1px solid rgba(255,255,255,0.04);
+      display:flex;
+      align-items:flex-end;
+      padding:28px;
+      margin-bottom:22px;
+    }
+    .hero::after{
+      content:"";
+      position:absolute;inset:0;
+      background:linear-gradient(180deg, rgba(7,7,8,0.25) 20%, rgba(7,7,8,0.75) 80%);
+      mix-blend-mode:multiply;
+    }
+    .hero-content{position:relative;z-index:2;max-width:1200px;display:flex;justify-content:space-between;width:100%}
+    .hero-left h2{margin:0;font-size:34px;line-height:1.03;font-weight:800;letter-spacing:-0.5px}
+    .hero-left p{margin:8px 0 0;color:var(--muted);max-width:620px}
+
+    .cta-wrap{display:flex;gap:12px;align-items:center}
+    .cta{padding:12px 20px;border-radius:12px;font-size:15px;border:0;cursor:pointer;font-weight:700}
+    .cta.primary{background:linear-gradient(90deg,#b85a3f,#8b0000);color:#fff;box-shadow:0 10px 30px rgba(184,90,63,0.18)}
+    .cta.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+    /* ====== Layout ====== */
+    .layout{display:grid;grid-template-columns: 1fr 360px;gap:20px;margin-top:18px}
+    @media (max-width:1000px){.layout{grid-template-columns:1fr}}
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);
+      box-shadow:var(--card-shadow);
+    }
+
+    /* ====== Movie Cards ====== */
+    .movie-grid{
+      display:grid;
+      grid-template-columns: repeat(3,1fr);
+      gap:14px;
+    }
+    @media(max-width:1100px){.movie-grid{grid-template-columns: repeat(2,1fr)}}
+    @media(max-width:640px){.movie-grid{grid-template-columns: 1fr}}
+
+    .movie-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:10px;overflow:hidden;display:flex;gap:12px;align-items:stretch;
+      transition:transform .22s ease, box-shadow .22s ease;cursor:pointer;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .movie-card:hover{transform:translateY(-8px);box-shadow:0 22px 40px rgba(0,0,0,0.6)}
+    .poster{min-width:120px;height:170px;background-size:cover;background-position:center;flex-shrink:0}
+    .movie-body{padding:12px;display:flex;flex-direction:column;justify-content:space-between;flex:1}
+    .movie-body h3{margin:0;font-size:16px}
+    .movie-body p{margin:6px 0 12px;color:var(--muted);font-size:13px}
+    .movie-meta{display:flex;justify-content:space-between;align-items:center}
+    .chip{background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:10px;font-weight:700;font-size:13px;border:1px solid rgba(255,255,255,0.02)}
+
+    /* ====== Stats grid ====== */
+    .stats-grid{display:grid;grid-template-columns: repeat(2,1fr);gap:12px}
+    @media(max-width:640px){.stats-grid{grid-template-columns:1fr}}
+    .stat{
+      padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      display:flex;flex-direction:column;gap:8px;border:1px solid rgba(255,255,255,0.03)
+    }
+    .stat h4{margin:0;font-size:13px;color:var(--muted)}
+    .stat strong{font-size:20px}
+
+    /* ====== Right sidebar list ====== */
+    .list-item{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;transition:background .15s}
+    .list-item:hover{background:rgba(255,255,255,0.02)}
+    .thumb{width:56px;height:56px;background-size:cover;border-radius:8px;border:1px solid rgba(255,255,255,0.03)}
+    .small-meta{display:flex;flex-direction:column}
+    .small-meta span{font-size:13px}
+
+    /* ====== Footer small ====== */
+    footer{margin-top:22px;color:var(--muted);font-size:13px;text-align:center}
+    /* small animations */
+    .fade-in{animation:fadeIn .6s ease both}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+
+  <nav class="nav fade-in">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <!-- simple monogram -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6">
+          <path d="M3 20v-16h6l4 8 4-8h4v16H3z" stroke-linejoin="round" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Telugu 2024 Dashboard</h1>
+        <p>Curated box-office snapshot • major Telugu releases of 2024</p>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <button class="btn">Export CSV</button>
+      <button class="btn">Refresh</button>
+      <button class="btn primary">Explore Top Movies</button>
+    </div>
+  </nav>
+
+  <header class="hero fade-in" role="banner">
+    <div class="hero-content">
+      <div class="hero-left">
+        <h2>Telugu Cinema — 2024 Box Office Highlights</h2>
+        <p>Heritage, scale, and spectacle — curated worldwide grosses for standout Telugu films released in 2024. Click a movie card for the source &amp; details.</p>
+      </div>
+      <div class="cta-wrap">
+        <button class="cta primary" id="cta-sos">View Major Releases</button>
+        <button class="cta ghost" id="cta-more">Download Data</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Left: main content -->
+    <section>
+      <div class="panel fade-in">
+        <h3 style="margin-top:0">Major 2024 Telugu Releases</h3>
+        <p style="color:var(--muted);margin-top:6px">This curated list shows prominent Telugu movies released in 2024 with reported box-office numbers and sources. Use the filter to refine by box-office or date.</p>
+
+        <div style="display:flex;gap:10px;margin:14px 0;align-items:center">
+          <input id="search" placeholder="Search movie title..." style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+          <select id="sort" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit">
+            <option value="gross_desc">Sort: Box Office ↓</option>
+            <option value="gross_asc">Sort: Box Office ↑</option>
+            <option value="date_desc">Sort: Release ↓</option>
+            <option value="date_asc">Sort: Release ↑</option>
+          </select>
+        </div>
+
+        <div class="movie-grid" id="movieGrid" aria-live="polite">
+          <!-- movie cards injected by JS -->
+        </div>
+      </div>
+
+      <div class="panel fade-in" style="margin-top:16px;">
+        <h3 style="margin-top:0">Box Office Insights</h3>
+        <div class="stats-grid" id="statsGrid">
+          <!-- stats injected by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: sidebar -->
+    <aside>
+      <div class="panel fade-in">
+        <h4 style="margin-top:0">Top Grossers</h4>
+        <div id="topList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+          <!-- top list injected by JS -->
+        </div>
+      </div>
+
+      <div class="panel fade-in" style="margin-top:16px;">
+        <h4 style="margin-top:0">Quick Filters</h4>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+          <button class="btn" onclick="filterBy('top')">Top > ₹300cr</button>
+          <button class="btn" onclick="filterBy('mid')">Medium 50–300cr</button>
+          <button class="btn" onclick="filterBy('all')">All</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    Data is curated from box-office trackers and news reports (sources linked below). Numbers are "reported worldwide grosses" and may be updated by official trackers.
+  </footer>
+
+  <script>
+    /* ====== Dataset: curated major Telugu films of 2024 + sources ======
+       Expand this array to include more films. Each item includes:
+         - title: movie title
+         - releaseDate: YYYY-MM-DD
+         - gross: displayed string (reported worldwide gross)
+         - grossValue: numeric value in crores INR (approx) for sorting/metrics (if available)
+         - img: poster / hero image (placeholder)
+         - source: short label
+         - sourceURL: URL to the cited report
+    */
+    const movies = [
+      {
+        title: "Pushpa: The Rule (Part 2)",
+        releaseDate: "2024-12-05",
+        gross: "Reported ~₹1,106 cr worldwide (news trackers)",
+        grossValue: 1106,
+        img: "https://images.unsplash.com/photo-1517604931442-5d0f8f6d4b14?q=80&w=800&auto=format&fit=crop",
+        source: "Hindustan Times / Sacnilk",
+        sourceURL: "https://www.hindustantimes.com/entertainment/telugu-cinema/pushpa-2-the-rule-worldwide-box-office-collection-allu-arjun-film-crosses-1100-crore-101734171238296.html"
+      },
+      {
+        title: "Kalki 2898 AD",
+        releaseDate: "2024-06-27",
+        gross: "Reported blockbuster — heavy worldwide grosses (tracked daywise).",
+        grossValue: 950,
+        img: "https://images.unsplash.com/photo-1523289333742-bea0a0df8f22?q=80&w=800&auto=format&fit=crop",
+        source: "Trade trackers (BoxOffice trackers / Sacnilk / The Numbers)",
+        sourceURL: "https://www.boxofficemojo.com/title/tt12735488/"
+      },
+      {
+        title: "Devara: Part 1",
+        releaseDate: "2024-09-27",
+        gross: "Reported >₹500 cr worldwide (makers/industry trackers).",
+        grossValue: 500,
+        img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop",
+        source: "NDTV / Indian Express",
+        sourceURL: "https://www.ndtv.com/entertainment/devara-part-1-box-office-collection-day-20-jr-ntr-s-film-earns-1-40-crore-6808224"
+      },
+      {
+        title: "HanuMan",
+        releaseDate: "2024-01-12",
+        gross: "Reported ~₹250–294 cr worldwide (reported closing numbers vary by tracker).",
+        grossValue: 294,
+        img: "https://images.unsplash.com/photo-1535223289827-42f1e9919769?q=80&w=800&auto=format&fit=crop",
+        source: "Koimoi / Indian Express",
+        sourceURL: "https://www.koimoi.com/box-office/hanuman-at-the-worldwide-box-office-closing-collection-finishes-off-in-style-by-entering-into-200-crore-club-in-india-but-misses-a-global-milestone/"
+      },
+      {
+        title: "Guntur Kaaram",
+        releaseDate: "2024-01-11",
+        gross: "Reported strong opening; trackers reported day 1 ~₹94 cr worldwide (early).",
+        grossValue: 94,
+        img: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=800&auto=format&fit=crop",
+        source: "Times of India",
+        sourceURL: "https://timesofindia.indiatimes.com/entertainment/telugu/movies/box-office/guntur-kaaram-box-office-mahesh-babu-starrer-makes-rs-94-crore-worldwide-official-number-out/articleshow/106829355.cms"
+      }
+      // NOTE: Add more entries here for other 2024 Telugu films.
+    ];
+
+    /* ====== Utilities ====== */
+    const moneyFmt = v => (v>=100 ? `₹${v.toLocaleString()} cr` : (v ? `₹${v} cr` : "—"));
+
+    /* ====== Render movie cards ====== */
+    const grid = document.getElementById('movieGrid');
+    const topList = document.getElementById('topList');
+    const statsGrid = document.getElementById('statsGrid');
+
+    function renderMovies(list){
+      grid.innerHTML = '';
+      list.forEach(m=>{
+        const node = document.createElement('article');
+        node.className = 'movie-card fade-in';
+        node.innerHTML = `
+          <div class="poster" style="background-image:url('${m.img}')"></div>
+          <div class="movie-body">
+            <div>
+              <h3>${m.title}</h3>
+              <p>${m.releaseDate} • <span style="color:var(--muted)">${m.source}</span></p>
+            </div>
+            <div class="movie-meta">
+              <div class="chip">${m.gross}</div>
+              <a class="btn" style="padding:8px 10px" onclick="openSource('${encodeURI(m.sourceURL)}')">Source</a>
+            </div>
+          </div>
+        `;
+        grid.appendChild(node);
+      });
+    }
+
+    function openSource(url){
+      window.open(decodeURI(url),'_blank','noopener');
+    }
+
+    /* ====== Top list & stats ====== */
+    function renderTopAndStats(){
+      const byGross = movies.slice().sort((a,b)=> (b.grossValue||0)-(a.grossValue||0));
+      topList.innerHTML = '';
+      for(let i=0;i<Math.min(5,byGross.length);i++){
+        const m = byGross[i];
+        const el = document.createElement('div');
+        el.className='list-item';
+        el.innerHTML = `
+          <div class="thumb" style="background-image:url('${m.img}')"></div>
+          <div class="small-meta">
+            <strong style="font-size:14px">${m.title}</strong>
+            <span style="color:var(--muted)">${m.gross}</span>
+          </div>
+        `;
+        el.onclick = () => openSource(encodeURI(m.sourceURL));
+        topList.appendChild(el);
+      }
+
+      // Stats: total tracked gross, avg, count
+      const values = movies.map(m=>m.grossValue||0).filter(v=>v>0);
+      const total = values.reduce((a,b)=>a+b,0);
+      const avg = Math.round((total / Math.max(1,values.length))*10)/10;
+      statsGrid.innerHTML = `
+        <div class="stat">
+          <h4>Total (tracked movies)</h4>
+          <strong>${moneyFmt(Math.round(total))}</strong>
+          <small style="color:var(--muted)">Sum of displayed grossValue in dataset</small>
+        </div>
+        <div class="stat">
+          <h4>Average (tracked)</h4>
+          <strong>${moneyFmt(avg)}</strong>
+          <small style="color:var(--muted)">Average gross among entries with numeric values</small>
+        </div>
+        <div class="stat">
+          <h4>Entries in dataset</h4>
+          <strong>${movies.length}</strong>
+          <small style="color:var(--muted)">Add more films to expand coverage</small>
+        </div>
+        <div class="stat">
+          <h4>Top grosser (dataset)</h4>
+          <strong>${byGross.length ? byGross[0].title : '—'}</strong>
+          <small style="color:var(--muted)">${byGross.length ? byGross[0].gross : ''}</small>
+        </div>
+      `;
+    }
+
+    /* ====== Filters / Sorting ====== */
+    document.getElementById('sort').addEventListener('change', e=>{
+      const val = e.target.value;
+      let copy = movies.slice();
+      if(val==='gross_desc') copy.sort((a,b)=>(b.grossValue||0)-(a.grossValue||0));
+      if(val==='gross_asc') copy.sort((a,b)=>(a.grossValue||0)-(b.grossValue||0));
+      if(val==='date_desc') copy.sort((a,b)=> new Date(b.releaseDate) - new Date(a.releaseDate));
+      if(val==='date_asc') copy.sort((a,b)=> new Date(a.releaseDate) - new Date(b.releaseDate));
+      renderMovies(copy);
+    });
+
+    document.getElementById('search').addEventListener('input', e=>{
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = movies.filter(m=>m.title.toLowerCase().includes(q));
+      renderMovies(filtered);
+    });
+
+    function filterBy(scope){
+      let filtered = movies;
+      if(scope==='top') filtered = movies.filter(m=>m.grossValue && m.grossValue>300);
+      if(scope==='mid') filtered = movies.filter(m=>m.grossValue && m.grossValue>=50 && m.grossValue<=300);
+      renderMovies(filtered);
+    }
+
+    // CTA buttons
+    document.getElementById('cta-sos').addEventListener('click', ()=> {
+      document.getElementById('search').focus();
+      window.scrollTo({top:document.querySelector('.panel').offsetTop-20,behavior:'smooth'});
+    });
+
+    document.getElementById('cta-more').addEventListener('click', ()=> {
+      // Simple download of dataset as JSON
+      const blob = new Blob([JSON.stringify(movies,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'telugu_2024_boxoffice.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // initial render
+    renderMovies(movies.slice().sort((a,b)=>(b.grossValue||0)-(a.grossValue||0)));
+    renderTopAndStats();
+
+    // Responsive: re-render stats if dataset changes (you can call renderTopAndStats() after edits)
+  </script>
+</body>
+</html>
 
